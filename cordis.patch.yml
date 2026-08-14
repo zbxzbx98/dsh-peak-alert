@@ -1,0 +1,8 @@
+# dsh-peak-alert bundle patch: inserts its plugin row into the web profile
+# roster. The row is a pure client plugin — the host side stays inert
+# (lib/index.js is a no-op), and the browser half (lib/client.js, via the
+# dsh.client declaration in package.json) renders the peak/off-peak pricing
+# chip in the composer dock band.
+- insert:
+    - id: dsh-peak-alert
+      name: 'dsh-peak-alert'
