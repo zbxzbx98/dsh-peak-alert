@@ -16,16 +16,17 @@ DeepSeek 峰谷定价提示插件（DSH Web 客户端插件，纯前端，无后
 
 **2. 输入卡片高峰染色（中档，DeepSeek 模型 + 高峰时段）**
 
-高峰时段（北京时间 09:00-12:00 / 14:00-18:00），**整个输入卡片（composer card）背景自动变为淡红色**（带红色描边），空闲时段自动恢复原样。通过稳定的 `[data-composer-card]` 选择器定位，用 inset 阴影叠加淡红层（保留主题背景与阴影），只影响输入卡片本身；跨时段切换即时变色。
+高峰时段（仅工作日，北京时间 09:00-12:00 / 14:00-18:00），**整个输入卡片（composer card）背景自动变为淡红色**（带红色描边），其他时间自动恢复原样。通过稳定的 `[data-composer-card]` 选择器定位，用 inset 阴影叠加淡红层（保留主题背景与阴影），只影响输入卡片本身；跨时段切换即时变色。
 
 **3. 时段 chip**
 
 输入框下方状态条（composer dock）显示彩色 chip：
 
-- **高峰时段**：红色 `⚠ 高峰时段 · 价格×2`
+- **高峰时段（仅工作日）**：红色 `⚠ 高峰时段 · 价格×2`
 - **空闲时段**：绿色 `空闲时段 · 价格×1`（价格为高峰的一半）
+- **周末（周六、周日）**：绿色 `空闲时段（周末）· 价格×1`（全天按低谷价收取，不再区分峰谷）
 
-chip 上同时显示当前北京时间和下次切换时间（如 `12:00 切空闲`），悬停可查看完整时段说明。每 10 秒自动刷新。
+chip 上同时显示当前北京时间和下次切换时间（如 `12:00 切空闲` / `周一 09:00 切高峰`，跨天会带星期），悬停可查看完整时段说明。每 10 秒自动刷新。
 
 **4. DeepSeek 模型自动识别**
 
@@ -55,6 +56,28 @@ dsh plugin --profile web add link:<绝对路径>/dsh-peak-alert
 
 安装后**重启 `dsh web` 并刷新页面**：高峰时段输入卡片变淡红，输入框下方状态条出现时段 chip。
 
+## 更新
+
+**安装方式 A（GitHub）的用户**，拉取最新提交：
+
+```sh
+dsh plugin --profile web update dsh-peak-alert
+```
+
+若未能拉到最新（例如之前按 commit/tag 固定过版本），先移除再重装：
+
+```sh
+dsh plugin --profile web remove dsh-peak-alert
+dsh plugin --profile web add https://github.com/zbxzbx98/dsh-peak-alert
+```
+
+更新后**重启 `dsh web` 并刷新页面**（客户端 bundle 按启动时的哈希加载，必须重启才生效）。
+
+**安装方式 B（link: 本地开发）**无需以上操作，改源码后重启即生效。
+
+想固定某个版本时，作者发布 tag（`git tag v0.1.0 && git push --tags`），用户可装指定版本：
+`dsh plugin --profile web add github:zbxzbx98/dsh-peak-alert#v0.1.0`
+
 ## 卸载
 
 ```sh
@@ -63,7 +86,7 @@ dsh plugin --profile web remove dsh-peak-alert
 
 ## 说明
 
-- 时段规则来自 DeepSeek 官方 2026-08-17 生效的峰谷定价方案：高峰 = 北京 09:00-12:00、14:00-18:00，空闲时段价格为高峰的一半（即高峰 ≈ 空闲 ×2）。
+- 时段规则来自 DeepSeek 官方峰谷定价方案：高峰（仅工作日）= 北京 09:00-12:00、14:00-18:00，空闲时段价格为高峰的一半（即高峰 ≈ 空闲 ×2）；**周末（周六、周日）全天不再区分峰谷，统一按低谷价收取**。
 - 纯浏览器端计算（`Intl.DateTimeFormat` 取北京时间），无需 API Key、不发起任何网络请求。
 - 结构：`dsh.client` 客户端插件 + `dsh.bundle.patch`（cordis.patch.yml 注册 `dsh-peak-alert` 行），node 半端为无操作占位。
 - 强度设置存于浏览器 `localStorage`（非 DSH 设置文档），换浏览器/清缓存后会恢复默认（中档）。
