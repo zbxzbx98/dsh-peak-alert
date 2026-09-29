@@ -1,6 +1,6 @@
 {
   "name": "dsh-peak-alert",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "DeepSeek 峰谷定价提示插件：高峰时段（北京周一至周五 09:00-12:00 / 14:00-18:00，不含法定节假日）把 DSH Web 输入卡片染成淡红色，并显示当前高峰/空闲时段、价格倍率与下次切换时间（自动跳过周末与法定节假日）",
   "type": "module",
   "main": "lib/index.js",
@@ -19,7 +19,6 @@
     },
     "client": {
       "inject": [
-        "@deepseek-ai/dsh-client-runtime",
         "@deepseek-ai/dsh-client-ui-slots",
         "@deepseek-ai/dsh-client-ui-conversation"
       ],
@@ -49,9 +48,8 @@
     "url": "git+https://github.com/zbxzbx98/dsh-peak-alert.git"
   },
   "peerDependencies": {
-    "@deepseek-ai/dsh-client-runtime": "^0.1.0-rc.6",
-    "@deepseek-ai/dsh-client-ui-conversation": "^0.1.0-rc.6",
-    "@deepseek-ai/dsh-client-ui-slots": "^0.1.0-rc.6",
+    "@deepseek-ai/dsh-client-ui-conversation": "^0.1.0-rc.6 || ^0.2.0-rc.2",
+    "@deepseek-ai/dsh-client-ui-slots": "^0.1.0-rc.6 || ^0.2.0-rc.2",
     "react": "^18.2.0"
   },
   "files": [

@@ -1,6 +1,6 @@
 # dsh-peak-alert
 
-DeepSeek 峰谷定价提示插件（DSH Web 客户端插件，纯前端，无后端依赖）。
+DeepSeek 峰谷定价提示插件（DSH 客户端插件，纯前端，无后端依赖）。同一份代码同时兼容 DSH **0.1.x（`dsh web`）** 与 **0.2.x（桌面端 DeepSeek Harness）**。
 
 时段规则（官方口径）：**北京时间周一至周五（不含中国法定节假日）09:00-12:00、14:00-18:00 为高峰时段；其余时段，包括周末及中国法定节假日全天，均为空闲时段**。空闲时段价格为高峰的一半（高峰 ≈ 空闲 ×2）。
 
@@ -73,7 +73,15 @@ git clone https://github.com/zbxzbx98/dsh-peak-alert.git
 dsh plugin --profile web add link:<绝对路径>/dsh-peak-alert
 ```
 
-安装后**重启 `dsh web` 并刷新页面**：高峰时段输入卡片变淡红，输入框下方状态条出现时段 chip。
+**桌面端（DeepSeek Harness）**：命令相同，把 `--profile web` 换成 `--profile desktop` 即可（桌面端 profile 与 Web profile 相互独立）：
+
+```sh
+dsh plugin --profile desktop add link:<绝对路径>/dsh-peak-alert
+```
+
+桌面端 `0.2.0-rc.2` 起图标命名与 `peerDependencies` 范围都变了，插件自 `0.2.1` 起同时兼容两代运行时；更早的插件版本（≤ `0.2.0`）在桌面端会被安装前检查拒绝（`incompatible-version`），并会在打开「设置 → 通用设置」时因图标改名而报错。
+
+安装后**重启 `dsh web` 并刷新页面**（桌面端则退出并重新打开应用）：高峰时段输入卡片变淡红，输入框下方状态条出现时段 chip。
 
 ## 更新
 
@@ -109,7 +117,8 @@ dsh plugin --profile web remove dsh-peak-alert
 - 时段计算全部在浏览器完成（`Intl.DateTimeFormat` 取北京时间，不依赖本机时区）；唯一的外部请求是按年拉取第三方法定节假日表（见上文「法定节假日识别」）。
 - 结构：`dsh.client` 客户端插件 + `dsh.bundle.patch`（cordis.patch.yml 注册 `dsh-peak-alert` 行），node 半端为无操作占位。
 - 强度设置与节假日缓存存于浏览器 `localStorage`（非 DSH 设置文档），换浏览器/清缓存后会恢复默认（中档）并重新拉取节假日表。
-- 自测：`node lib/_holidaytest.mjs` 会在 Node 里用假浏览器外壳加载 `lib/client.js`，校验节假日低谷、下一个高峰推算、接口解析与缓存容错（不需要启动 DSH）。
+- **多版本兼容**：插件依赖的两代运行时都保留的契约——DOM 钩子 `[data-composer-card]` / `[data-composer-seat]` / 模型按钮 `aria-haspopup="menu"` 与 aria-label、slot `conversation.composer.dock` 与 `settings.general.item`、`Menu` 的 `items[].id` / `selectedId` / `onSelect(id)` 语义、`window.__ModuleLoader__.load({ id, factory })` 加载协议。**唯一差异是图标命名**：0.1.x 用尺寸后缀（`IconChevronDownOutline14`），0.2.x 用字重后缀（`IconChevronDownOutlineRegular`），插件按「新名优先 → 旧名兜底 → 都没有就不渲染该装饰性图标」处理，避免 React 收到 `undefined` 组件直接抛错。
+- **`peerDependencies` 的版本范围**：DSH 在安装前会用**运行时版本**去匹配这些范围（只检查名为 `@deepseek-ai/dsh` 或以 `@deepseek-ai/dsh-` 开头的项），不匹配就报 `incompatible-version`。因此本插件声明为 `^0.1.0-rc.6 || ^0.2.0-rc.2`。将来出现新的运行时版本（如 0.3.x）需要同步放宽，或逐版本豁免：`dsh plugin --profile <profile> allow-version <包名@版本> --dsh-version <运行时版本> --accept-risk`（豁免按精确版本记录，插件升级与 DSH 升级都不继承）。
 
 ## 许可
 
